@@ -80,7 +80,7 @@ fig.tight_layout
 with open('rocket_properties.png', 'w') as outfile:
     fig.canvas.print_png(outfile)
 
-# C_w  MEMOIZE here
+# C_w 
 # parachute calculation possible with new cw-values dependent on deployment time
 # (new parameter) and cross section over time function
 def f_cw_sep(t,t_sep):
