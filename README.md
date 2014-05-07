@@ -3,7 +3,7 @@ pyrocket
 
 Small Amateur 1D Rocket Simulation Script
 
-# What is Implemented
+## What is Implemented
 
 * Standard Atmosphere
   * Changing Temperature over Altitude
@@ -20,20 +20,36 @@ Small Amateur 1D Rocket Simulation Script
 * Following Camera Angle over Time
   * Dependent on distance to launchpad
 
-# Output
+##Output
 
-## Flight
+### Flight
 
 ![flight](https://raw.githubusercontent.com/Lageos/pyrocket/master/flight.png)
 
-## Rocket Properties over Time
+### Rocket Properties over Time
 
 ![properties](https://raw.githubusercontent.com/Lageos/pyrocket/master/rocket_properties.png)
 
-## Optimal Separation Time Optimization
+### Optimal Separation Time Optimization
 
 ![optim_t_sep](https://raw.githubusercontent.com/Lageos/pyrocket/master/t_sep_altitude.png)
 
-## Autotracking Angle
+### Autotracking Angle
 
 ![autotracking_angle](https://raw.githubusercontent.com/Lageos/pyrocket/master/autotracking.png)
+
+## Future Plans
+
+* Three Dimensional Flight
+  * Vertical drift due to side wind
+  * Launch ramp skew
+  * Statistical considerations
+* Google Earth / Maps Integration
+  * Start Coordinates
+  * Touch Down region
+    * Ballistic Flight
+    * Successfull Parachute Flight
+* UI (Pygame)
+
+## Contact
+Twitter: @soegal
