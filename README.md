@@ -24,16 +24,16 @@ Small Amateur 1D Rocket Simulation
 
 ## Flight
 
-![flight](lageos.github.com/pyrocket/master/flight.png)
+![flight](https://raw.githubusercontent.com/Lageos/pyrocket/master/flight.png)
 
 ## Rocket Properties over Time
 
-![properties](lageos.github.com/pyrocket/master/flight.png)
+![properties](https://raw.githubusercontent.com/Lageos/pyrocket/master/rocket_properties.png)
 
 ## Optimal Separation Time Optimization
 
-![optim_t_sep](lageos.github.com/pyrocket/master/t_sep_altitude.png)
+![optim_t_sep](https://raw.githubusercontent.com/Lageos/pyrocket/master/t_sep_altitude.png)
 
 ## Autotracking Angle
 
-![autotracking_angle](lageos.github.com/pyrocket/master/autotracking.png)
+![autotracking_angle](https://raw.githubusercontent.com/Lageos/pyrocket/master/autotracking.png)
