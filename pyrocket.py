@@ -129,14 +129,12 @@ def find_nearest(array,value):
 def diff(x, t):
   """differential equation without separation"""
   thrust = f_thrust(t)
-  mass = f_m(t)  #### f_m
+  mass = f_m(t)
   v = x[0]
   h = x[1]
   rho = rho_h(h)
-  return np.array((
-                      thrust/mass - g -0.5*rho*cross_section*cw*v**2*np.sign(v)/mass,  # x[1]= x
-                     v                                         # x[0] =x'
-                   ))
+  # array  x[1]= x,  x[0] =x'
+  return np.array(( thrust/mass - g -0.5*rho*cross_section*cw*v**2*np.sign(v)/mass,   v ))
 
 def diff_sep(x, t, t_s):
   """differential equation without separation"""
@@ -148,8 +146,8 @@ def diff_sep(x, t, t_s):
   if t_s< (t_burn+0.001):
     t_s=t_burn+0.001
   cw = f_cw_sep(t,t_s)
-  #array  x[1]= x             # x[0] =x'
-  return np.array((thrust/mass - g -0.5*rho*cross_section*cw*v**2*np.sign(v)/mass,  v  ))
+  # array  x[1]= x ,  x[0] =x'
+  return np.array((thrust/mass - g -0.5*rho*cross_section*cw*v**2*np.sign(v)/mass,  v ))
 
 ## Solution
 x_0 = np.array([0., 0.])
