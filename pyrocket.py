@@ -59,7 +59,7 @@ ax[0].set_xlabel("Time s")
 ax[0].set_title("Rocket Properties")
 
 
-# Mass
+# mass over time
 def f_m_sep(t,t_sep):
   """mass dependent on time (interpolation)"""
   f_m_sep = interpolate.interp1d([-100.,0.,t_burn,t_sep-0.0005,t_sep,t_flight+1000.],
