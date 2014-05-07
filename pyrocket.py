@@ -5,26 +5,23 @@ from scipy.integrate import odeint, cumtrapz
 from scipy import interpolate
 
 # tested with python 2.7.6 , matplotlib 1.3.1, numpy 1.8.0, scipy 0.13.0
-print(" ")
-print("### Rocket Equation III ###")
-print(" ")
+print("### pyrocket ###")
+
 
 ### Parameters ###
 t_flight = 40.0 # simulation time
 t_burn = 3.6
-d = 103.8e-3 # diameter m 
+d = 103.8e-3 # diameter m
 cross_section = d**2*np.pi/4.
 m_propelant = 0.990 # starting propelant mass
 m_start= 9.685 # wet mass (incl motor)
-m_upper = 5.513 # mass upper stage 
+m_upper = 5.513 # mass upper stage
 cw = 0.6 # drag coefficent overall
 cw_sep = 0.55 # drag upper stage,  early sep optimal < 0.3804255 < late sep optimal
 g = 9.81 # m/s^2
-
 ## Calculation Parameters
 n = 1000 # number of steps for solution 1410.827 m
 n_sep = 30 # number of different sep-time steps for solution of optimal sep. time
-
 print("Simulation time:        %0.1f s" % t_flight)
 print("Start mass:             %0.2f kg" % m_start)
 print("Upper stage mass:       %0.2f kg" % m_upper)
@@ -33,6 +30,7 @@ print("Motor:                  K570")
 print("Upper Stage mass:       %0.2f kg" % m_upper)
 print("Cw overall:             %0.5f" % cw)
 print("Cw upper stage:         %0.5f" % cw_sep)
+
 
 # Thrust Curve cessaroni K 570 from http://www.thrustcurve.org/
 t_thrust =  np.array([ [ -100.00 ,    0.0 ],
@@ -48,22 +46,32 @@ t_thrust =  np.array([ [ -100.00 ,    0.0 ],
     [3.47, 67.00 ],
     [3.59, 0.00 ],
     [t_flight+1000., 0.0]])
-f_thrust = interpolate.interp1d(t_thrust[:,0], t_thrust[:,1],kind='slinear', bounds_error=True)
+f_thrust = interpolate.interp1d(t_thrust[:,0], t_thrust[:,1],kind='slinear',
+bounds_error=True)
 fig, ax = plt.subplots(2,1, sharex=True)
-ax[0].plot(np.linspace(0.,np.around(t_burn*2),100),f_thrust(np.linspace(0.,np.around(t_burn*2),100)))
+ax[0].plot(np.linspace(0.,np.around(t_burn*2),100),
+f_thrust(np.linspace(0.,np.around(t_burn*2),100)))
 ax[0].grid()
-ax[0].fill_between(np.linspace(0.,np.around(t_burn*2),100),0,f_thrust(np.linspace(0.,np.around(t_burn*2),100)),alpha=0.1)
+ax[0].fill_between(np.linspace(0.,np.around(t_burn*2),100),0,
+f_thrust(np.linspace(0.,np.around(t_burn*2),100)),alpha=0.1)
 ax[0].set_ylabel("Thrust N")
 ax[0].set_xlabel("Time s")
 ax[0].set_title("Rocket Properties")
 
+
 # Mass
 def f_m_sep(t,t_sep):
-    f_m_sep = interpolate.interp1d([-100.,0.,t_burn,t_sep-0.0005,t_sep,t_flight+1000.],[m_start,m_start,(m_start-m_propelant),(m_start-m_propelant),m_upper,m_upper],kind='slinear',bounds_error=True)
+  """mass dependent on time (interpolation)"""
+    f_m_sep = interpolate.interp1d([-100.,0.,t_burn,t_sep-0.0005,t_sep,t_flight+1000.],
+    [m_start,m_start,(m_start-m_propelant),(m_start-m_propelant),m_upper,m_upper],
+    kind='slinear',bounds_error=True)
     return f_m_sep(t)
-f_m = interpolate.interp1d([-100.,0.,t_burn,t_flight+1000.],[(m_start),(m_start),m_start-m_propelant,m_start-m_propelant],kind='slinear',bounds_error=True)
-ax[1].plot(np.linspace(0.,np.around(t_burn*2),100),f_m(np.linspace(0.,np.around(t_burn*2),100)))
-ax[1].fill_between(np.linspace(0.,np.around(t_burn*2),100),0,f_m(np.linspace(0.,np.around(t_burn*2),100)),alpha=0.1)
+f_m = interpolate.interp1d([-100.,0.,t_burn,t_flight+1000.],[(m_start),(m_start),
+m_start-m_propelant,m_start-m_propelant],kind='slinear',bounds_error=True)
+ax[1].plot(np.linspace(0.,np.around(t_burn*2),100),
+f_m(np.linspace(0.,np.around(t_burn*2),100)))
+ax[1].fill_between(np.linspace(0.,np.around(t_burn*2),100),0,
+f_m(np.linspace(0.,np.around(t_burn*2),100)),alpha=0.1)
 ax[1].set_ylim([0,(m_start+m_propelant)*1.2])
 ax[1].grid()
 ax[1].set_ylabel("Mass kg")
@@ -73,13 +81,17 @@ with open('rocket_properties.png', 'w') as outfile:
     fig.canvas.print_png(outfile)
 
 # C_w  MEMOIZE here
-# parachute calculation possible with new cw-values dependent on deployment time (new parameter) and cross section over time function
+# parachute calculation possible with new cw-values dependent on deployment time
+# (new parameter) and cross section over time function
 def f_cw_sep(t,t_sep):
-    f_cw_sep = interpolate.interp1d([-100.,t_sep-0.0005,t_sep,t_flight+1000.],[cw,cw,cw_sep,cw_sep],kind='linear',bounds_error=True)
+  """drag (cw) dependent on time (interpolation)"""
+    f_cw_sep = interpolate.interp1d([-100.,t_sep-0.0005,t_sep,t_flight+1000.],
+    [cw,cw,cw_sep,cw_sep],kind='linear',bounds_error=True)
     return f_cw_sep(t)
 
 # Temparture over Altitude
 def T_norm(h):
+  """temperature in respect to altitude (interpolation of standard atmosphere)"""
     temp =  np.array([[ -100000. ,    15.0 ],
     [ 0. ,    15.0 ],
     [11000., -56.5 ],
@@ -90,41 +102,45 @@ def T_norm(h):
     [71000., -58.5 ],
     [84852., -86.28 ],
     [200000., -86.28 ]])
-    f_temp = interpolate.interp1d(temp[:,0], temp[:,1],kind='linear', bounds_error=True)  
+    f_temp = interpolate.interp1d(temp[:,0], temp[:,1],kind='linear', bounds_error=True)
     T = f_temp(h)
     return  T
 
 # Density over Altitude
-def rho_h(h): 
+def rho_h(h):
+  """air density in respect to altitude (interpolation of standard atmosphere)"""
     p_0 = 1013.25e2 #Pa
     p = p_0 *np.exp(-h/7990.)
-    R_s = 287.058 
-    rho = p/(R_s*(T_norm(h)+273.15)) # 
+    R_s = 287.058
+    rho = p/(R_s*(T_norm(h)+273.15)) #
     return rho
+
 
 ### Functions ###
 def find_nearest(array,value):
+  """ find neares value """
     index = (np.abs(array-value)).argmin()
-    return index 
+    return index
 
 
-### Flight Calculation with CHANGING DENSITY #### 
-
+### Flight Calculation with CHANGING DENSITY ####
 ## Equation: a = F_ges(t,h)/m(t)-g
 
 ## Definitions
-def diff(x, t): # without separation
+def diff(x, t):
+  """differential equation without separation"""
     thrust = f_thrust(t)
     mass = f_m(t)  #### f_m
     v = x[0]
     h = x[1]
     rho = rho_h(h)
-    
     return np.array((
                       thrust/mass - g -0.5*rho*cross_section*cw*v**2*np.sign(v)/mass,  # x[1]= x
                      v                                         # x[0] =x'
                    ))
-def diff_sep(x, t, t_s): # with separation
+
+def diff_sep(x, t, t_s):
+  """differential equation without separation"""
     thrust = f_thrust(t)
     mass = f_m_sep(t,t_s)  # f_m_sep
     v = x[0]
@@ -133,25 +149,23 @@ def diff_sep(x, t, t_s): # with separation
     if t_s< (t_burn+0.001):
         t_s=t_burn+0.001
     cw = f_cw_sep(t,t_s)
-    
     return np.array((
                       thrust/mass - g -0.5*rho*cross_section*cw*v**2*np.sign(v)/mass,  # x[1]= x
                      v                                         # x[0] =x'
                    ))
 
-## Solution 
+## Solution
 x_0 = np.array([0., 0.])
 t = np.linspace(0., t_flight, n)
-
 ## solve ode without separation
 x = odeint(diff, x_0, t)
 # velocity
 v = x[:,0]
 # altitude
-h = x[:,1] 
+h = x[:,1]
 # acceleration
-a = f_thrust(t)/f_m(t) - g -0.5*rho_h(h)*cross_section*cw*v**2*np.sign(v)/f_m(t) 
-
+a = f_thrust(t)/f_m(t) - g -0.5*rho_h(h)*cross_section*cw*v**2*np.sign(v)/f_m(t)
+# max altitude
 h_max = np.nanmax(h)
 i_apogee = find_nearest(h,h_max)
 
@@ -159,25 +173,27 @@ i_apogee = find_nearest(h,h_max)
 h_max_sep = 0.
 t_sep_range = np.linspace(t_burn+0.001,t[i_apogee+10],40)
 h_max_sep_range = np.zeros(40)
-for [t_separation,h_max_new_sep] in np.nditer([t_sep_range,h_max_sep_range], op_flags=[['readwrite'],['readwrite']]):
+for [t_separation,h_max_new_sep] in np.nditer([t_sep_range,h_max_sep_range],
+op_flags=[['readwrite'],['readwrite']]):
     x_sep = odeint(diff_sep, x_0, t, (t_separation,))  # solve ode with separation
     h_sep = x_sep[:,1] # get altitude
     h_mns = np.nanmax(h_sep) # determine if new sep time gives a better max. alt.
-    h_max_new_sep[...] = np.float_(h_mns) 
+    h_max_new_sep[...] = np.float_(h_mns)
     if h_mns > h_max_sep:
         h_max_sep = h_mns
         t_h_max_sep = t_separation
 
 ## solve ode with separation
-x_sep = odeint(diff_sep, x_0, t, (t_h_max_sep,))  
+x_sep = odeint(diff_sep, x_0, t, (t_h_max_sep,))
 # altitude
 h_sep = x_sep[:,1]
 # velocity
 v_sep = x_sep[:,0]
 # acceleration
-a_sep = f_thrust(t)/f_m_sep(t,t_h_max_sep) - g -0.5*rho_h(h_sep)*cross_section*f_cw_sep(t,t_h_max_sep)*v**2*np.sign(v_sep)/f_m_sep(t,t_h_max_sep)
-
-f_v_h = interpolate.interp1d(h[range(np.around(n*0.1).astype(int))],v[range(np.around(n*0.1).astype(int))],kind='cubic',bounds_error=True) 
+a_sep = f_thrust(t)/f_m_sep(t,t_h_max_sep) - g -0.5*rho_h(h_sep)*cross_section*
+f_cw_sep(t,t_h_max_sep)*v**2*np.sign(v_sep)/f_m_sep(t,t_h_max_sep)
+f_v_h = interpolate.interp1d(h[range(np.around(n*0.1).astype(int))],
+v[range(np.around(n*0.1).astype(int))],kind='cubic',bounds_error=True)
 
 # max. values
 a_max = np.nanmax(a)
@@ -188,9 +204,9 @@ h_max = np.nanmax(h)
 i_impact = find_nearest(h[30:],0.0)
 i_apogee = find_nearest(h,h_max)
 
-f_a_sep= interpolate.interp1d(t,a_sep,kind='linear',bounds_error=True) 
-f_v_sep= interpolate.interp1d(t,v_sep,kind='linear',bounds_error=True) 
-f_h_sep= interpolate.interp1d(t,h_sep,kind='linear',bounds_error=True) 
+f_a_sep= interpolate.interp1d(t,a_sep,kind='linear',bounds_error=True)
+f_v_sep= interpolate.interp1d(t,v_sep,kind='linear',bounds_error=True)
+f_h_sep= interpolate.interp1d(t,h_sep,kind='linear',bounds_error=True)
 
 # max. values
 a_max_sep = np.nanmax(a_sep)
@@ -264,7 +280,8 @@ with open('autotracking.png', 'w') as outfile:
 
 ### altitude as function over separation time plot ###
 fig,ax = plt.subplots(1,1)
-ax.plot(t_sep_range,h_max_sep_range,'-+',label=("c_w=%0.2f c_wsep=%0.2f" %(cw,cw_sep)))
+ax.plot(t_sep_range,h_max_sep_range,'-+',
+label=("c_w=%0.2f c_wsep=%0.2f" %(cw,cw_sep)))
 ax.plot(t_h_max_sep,h_max_sep,'.r')
 ax.grid()
 ax.legend(loc='lower center')
