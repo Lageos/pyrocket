@@ -1,7 +1,7 @@
 pyrocket
 ========
 
-Small Amateur 1D Rocket Simulation
+Small Amateur 1D Rocket Simulation Script
 
 # What is Implemented
 
