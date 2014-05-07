@@ -1,7 +1,7 @@
 from __future__ import print_function, division
 import matplotlib.pylab as plt
 import numpy as np
-from scipy.integrate import odeint, cumtrapz
+from scipy.integrate import odeint
 from scipy import interpolate
 
 # tested with python 2.7.6 , matplotlib 1.3.1, numpy 1.8.0, scipy 0.13.0
@@ -148,10 +148,8 @@ def diff_sep(x, t, t_s):
   if t_s< (t_burn+0.001):
     t_s=t_burn+0.001
   cw = f_cw_sep(t,t_s)
-  return np.array((
-                      thrust/mass - g -0.5*rho*cross_section*cw*v**2*np.sign(v)/mass,  # x[1]= x
-                     v                                         # x[0] =x'
-                   ))
+  #array  x[1]= x             # x[0] =x'
+  return np.array((thrust/mass - g -0.5*rho*cross_section*cw*v**2*np.sign(v)/mass,  v  ))
 
 ## Solution
 x_0 = np.array([0., 0.])
