@@ -134,7 +134,7 @@ def diff(x, t):
   h = x[1]
   rho = rho_h(h)
   # array  x[1]= x,  x[0] =x'
-  return np.array(( thrust/mass - g -0.5*rho*cross_section*cw*v**2*np.sign(v)/mass,   v ))
+  return np.array(( thrust/mass - g -0.5*rho*cross_section*cw*v**2*np.sign(v)/mass,   v))
 
 def diff_sep(x, t, t_s):
   """differential equation without separation"""
