@@ -62,10 +62,10 @@ ax[0].set_title("Rocket Properties")
 # Mass
 def f_m_sep(t,t_sep):
   """mass dependent on time (interpolation)"""
-    f_m_sep = interpolate.interp1d([-100.,0.,t_burn,t_sep-0.0005,t_sep,t_flight+1000.],
-    [m_start,m_start,(m_start-m_propelant),(m_start-m_propelant),m_upper,m_upper],
-    kind='slinear',bounds_error=True)
-    return f_m_sep(t)
+  f_m_sep = interpolate.interp1d([-100.,0.,t_burn,t_sep-0.0005,t_sep,t_flight+1000.],
+  [m_start,m_start,(m_start-m_propelant),(m_start-m_propelant),m_upper,m_upper],
+  kind='slinear',bounds_error=True)
+  return f_m_sep(t)
 f_m = interpolate.interp1d([-100.,0.,t_burn,t_flight+1000.],[(m_start),(m_start),
 m_start-m_propelant,m_start-m_propelant],kind='slinear',bounds_error=True)
 ax[1].plot(np.linspace(0.,np.around(t_burn*2),100),
@@ -80,48 +80,47 @@ fig.tight_layout
 with open('rocket_properties.png', 'w') as outfile:
     fig.canvas.print_png(outfile)
 
-# C_w 
+# C_w
 # parachute calculation possible with new cw-values dependent on deployment time
 # (new parameter) and cross section over time function
 def f_cw_sep(t,t_sep):
   """drag (cw) dependent on time (interpolation)"""
-    f_cw_sep = interpolate.interp1d([-100.,t_sep-0.0005,t_sep,t_flight+1000.],
-    [cw,cw,cw_sep,cw_sep],kind='linear',bounds_error=True)
-    return f_cw_sep(t)
+  f_cw_sep = interpolate.interp1d([-100.,t_sep-0.0005,t_sep,t_flight+1000.],
+  [cw,cw,cw_sep,cw_sep],kind='linear',bounds_error=True)
+  return f_cw_sep(t)
 
 # Temparture over Altitude
 def T_norm(h):
   """temperature in respect to altitude (interpolation of standard atmosphere)"""
-    temp =  np.array([[ -100000. ,    15.0 ],
-    [ 0. ,    15.0 ],
-    [11000., -56.5 ],
-    [20000., -56.5 ],
-    [32000., -44.5 ],
-    [47000., -2.5 ],
-    [51000., -2.5 ],
-    [71000., -58.5 ],
-    [84852., -86.28 ],
-    [200000., -86.28 ]])
-    f_temp = interpolate.interp1d(temp[:,0], temp[:,1],kind='linear', bounds_error=True)
-    T = f_temp(h)
-    return  T
+  temp =  np.array([[ -100000. ,    15.0 ],
+  [ 0. ,    15.0 ],
+  [11000., -56.5 ],
+  [20000., -56.5 ],
+  [32000., -44.5 ],
+  [47000., -2.5 ],
+  [51000., -2.5 ],
+  [71000., -58.5 ],
+  [84852., -86.28 ],
+  [200000., -86.28 ]])
+  f_temp = interpolate.interp1d(temp[:,0], temp[:,1],kind='linear', bounds_error=True)
+  T = f_temp(h)
+  return  T
 
 # Density over Altitude
 def rho_h(h):
   """air density in respect to altitude (interpolation of standard atmosphere)"""
-    p_0 = 1013.25e2 #Pa
-    p = p_0 *np.exp(-h/7990.)
-    R_s = 287.058
-    rho = p/(R_s*(T_norm(h)+273.15)) #
-    return rho
+  p_0 = 1013.25e2 #Pa
+  p = p_0 *np.exp(-h/7990.)
+  R_s = 287.058
+  rho = p/(R_s*(T_norm(h)+273.15)) #
+  return rho
 
 
 ### Functions ###
 def find_nearest(array,value):
   """ find neares value """
-    index = (np.abs(array-value)).argmin()
-    return index
-
+  index = (np.abs(array-value)).argmin()
+  return index
 
 ### Flight Calculation with CHANGING DENSITY ####
 ## Equation: a = F_ges(t,h)/m(t)-g
@@ -129,27 +128,27 @@ def find_nearest(array,value):
 ## Definitions
 def diff(x, t):
   """differential equation without separation"""
-    thrust = f_thrust(t)
-    mass = f_m(t)  #### f_m
-    v = x[0]
-    h = x[1]
-    rho = rho_h(h)
-    return np.array((
+  thrust = f_thrust(t)
+  mass = f_m(t)  #### f_m
+  v = x[0]
+  h = x[1]
+  rho = rho_h(h)
+  return np.array((
                       thrust/mass - g -0.5*rho*cross_section*cw*v**2*np.sign(v)/mass,  # x[1]= x
                      v                                         # x[0] =x'
                    ))
 
 def diff_sep(x, t, t_s):
   """differential equation without separation"""
-    thrust = f_thrust(t)
-    mass = f_m_sep(t,t_s)  # f_m_sep
-    v = x[0]
-    h = x[1]
-    rho = rho_h(h)
-    if t_s< (t_burn+0.001):
-        t_s=t_burn+0.001
-    cw = f_cw_sep(t,t_s)
-    return np.array((
+  thrust = f_thrust(t)
+  mass = f_m_sep(t,t_s)  # f_m_sep
+  v = x[0]
+  h = x[1]
+  rho = rho_h(h)
+  if t_s< (t_burn+0.001):
+    t_s=t_burn+0.001
+  cw = f_cw_sep(t,t_s)
+  return np.array((
                       thrust/mass - g -0.5*rho*cross_section*cw*v**2*np.sign(v)/mass,  # x[1]= x
                      v                                         # x[0] =x'
                    ))
@@ -175,13 +174,13 @@ t_sep_range = np.linspace(t_burn+0.001,t[i_apogee+10],40)
 h_max_sep_range = np.zeros(40)
 for [t_separation,h_max_new_sep] in np.nditer([t_sep_range,h_max_sep_range],
 op_flags=[['readwrite'],['readwrite']]):
-    x_sep = odeint(diff_sep, x_0, t, (t_separation,))  # solve ode with separation
-    h_sep = x_sep[:,1] # get altitude
-    h_mns = np.nanmax(h_sep) # determine if new sep time gives a better max. alt.
-    h_max_new_sep[...] = np.float_(h_mns)
-    if h_mns > h_max_sep:
-        h_max_sep = h_mns
-        t_h_max_sep = t_separation
+  x_sep = odeint(diff_sep, x_0, t, (t_separation,))  # solve ode with separation
+  h_sep = x_sep[:,1] # get altitude
+  h_mns = np.nanmax(h_sep) # determine if new sep time gives a better max. alt.
+  h_max_new_sep[...] = np.float_(h_mns)
+  if h_mns > h_max_sep:
+    h_max_sep = h_mns
+    t_h_max_sep = t_separation
 
 ## solve ode with separation
 x_sep = odeint(diff_sep, x_0, t, (t_h_max_sep,))
@@ -190,8 +189,8 @@ h_sep = x_sep[:,1]
 # velocity
 v_sep = x_sep[:,0]
 # acceleration
-a_sep = f_thrust(t)/f_m_sep(t,t_h_max_sep) - g -0.5*rho_h(h_sep)*cross_section*
-f_cw_sep(t,t_h_max_sep)*v**2*np.sign(v_sep)/f_m_sep(t,t_h_max_sep)
+a_sep = (f_thrust(t)/f_m_sep(t,t_h_max_sep) - g -0.5*rho_h(h_sep)*cross_section*
+f_cw_sep(t,t_h_max_sep)*v**2*np.sign(v_sep)/f_m_sep(t,t_h_max_sep))
 f_v_h = interpolate.interp1d(h[range(np.around(n*0.1).astype(int))],
 v[range(np.around(n*0.1).astype(int))],kind='cubic',bounds_error=True)
 
@@ -276,7 +275,7 @@ ax.set_ylabel("Angle deg")
 ax.set_xlabel("Time s")
 ax.set_title("Autotracking")
 with open('autotracking.png', 'w') as outfile:
-    fig.canvas.print_png(outfile)
+  fig.canvas.print_png(outfile)
 
 ### altitude as function over separation time plot ###
 fig,ax = plt.subplots(1,1)
@@ -289,4 +288,4 @@ ax.set_ylabel("Altitude reached m")
 ax.set_xlabel("Separation Time s")
 ax.set_title("Altitude (max.%0.2f m with t_sep=%0.2f s)" % (h_max_sep,t_h_max_sep))
 with open('t_sep_altitude.png', 'w') as outfile:
-    fig.canvas.print_png(outfile)
+  fig.canvas.print_png(outfile)
