@@ -278,7 +278,7 @@ class pyrocket_gui:
                 ax.set_xlabel("Time s")
                 ax.set_title("Autotracking")
                 print("Max. Vel. Autotr.:     %4.3f deg/s" % phi_point_max)
-                print("Max. Vel. Autotr.:     %4.3f rpm" % (phi_point_max/60))
+                print("Max. Vel. Autotr.:     %4.3f rpm" % (phi_point_max/6))
             print (" ")      
             plt.show()
         
