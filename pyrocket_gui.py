@@ -17,7 +17,7 @@ class pyrocket_gui:
         
         def simulation():
             if self.two_stage_sim.get() == 1:
-                return()
+                return() # not yet implemented
             else:                
                 pyrocket_one_stage()
             return()
@@ -178,7 +178,7 @@ class pyrocket_gui:
         
         
         def pyrocket_one_stage():
-            print("# One stage simulation #")
+            print("## One stage simulation ##")
             # Parameters
             if self.motor_k570.get() == 1:
                 motor = k570()
@@ -189,7 +189,11 @@ class pyrocket_gui:
             cw = float(self.cw_total_var.get())
             m_start= m_empty + motor.m_propelant
             f_m = interpolate.interp1d([-100.,0.,motor.t_burn,inf],[(m_start),(m_start),m_start-motor.m_propelant,m_start-motor.m_propelant],kind='slinear',bounds_error=True)
-            
+            print("Simulation time:        %0.1f s" % t_flight)
+            print("Steps:                  %0.2d" % n)
+            print("Start mass:             %0.2f kg" % m_start)
+            print("Diameter:               %0.3f m" % (float(self.diameter_var.get())/1000))
+            print("Cw:                     %0.5f" % cw)
             
             def diff(x, t):
                 """differential equation without separation"""
@@ -207,7 +211,7 @@ class pyrocket_gui:
             t = np.linspace(0., t_flight, n)
             ## solve ode without separation
             x = odeint(diff, x_0, t)
-            print("Simulation Finished")
+            print("# Simulation Finished #")
             # velocity
             v = x[:,0]
             # altitude
@@ -231,7 +235,7 @@ class pyrocket_gui:
             #print("Velocity after 7 m:     %4.3f m/s" % f_v_h(7.))
             print ("Apogee after:          %4.3f s" % t[i_apogee])
             print ("Impact after:          %4.3f s" % t[i_impact])
-            print (" ")   
+              
 
             fig, ax = plt.subplots(3,1,sharex=True)
             ax[0].plot(t,a,label="Acceleration")
@@ -263,6 +267,8 @@ class pyrocket_gui:
             if self.autotracking_select_var.get() ==1:                
                 d_ramp  = float(self.autotracking_var.get()) # distance to ramp
                 phi_1 = np.degrees(np.arctan(h/d_ramp))
+                phi_point = np.degrees(np.arctan(v/d_ramp))
+                phi_point_max = np.nanmax(phi_point)
                 fig, ax = plt.subplots(1,1)
                 ax.plot(t,phi_1,label="Distance: %3.d m" % d_ramp)
                 ax.grid()
@@ -271,7 +277,9 @@ class pyrocket_gui:
                 ax.set_ylabel("Angle deg")
                 ax.set_xlabel("Time s")
                 ax.set_title("Autotracking")
-                 
+                print("Max. Vel. Autotr.:     %4.3f deg/s" % phi_point_max)
+                print("Max. Vel. Autotr.:     %4.3f rpm" % (phi_point_max/60))
+            print (" ")      
             plt.show()
         
         # Enter the tkinter main loop.
