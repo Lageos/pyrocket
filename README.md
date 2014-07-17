@@ -17,7 +17,7 @@ Small Amateur 1D Rocket Simulation Program
 * Altitude, Velocity, Acceleration Calculation
 * Ideal Separation Time Optimization (not in GUI)
 * Automatic Plots
-* Following Camera Angle over Time (not in GUI)
+* Following Camera Angle over Time
   * Dependent on distance to launchpad
 
 ##Output
