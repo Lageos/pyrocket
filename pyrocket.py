@@ -119,7 +119,7 @@ def rho_h(h):
 
 ### Functions ###
 def find_nearest(array,value):
-  """ find neares value """
+  """ find nearest value """
   index = (np.abs(array-value)).argmin()
   return index
 
@@ -138,7 +138,7 @@ def diff(x, t):
   return np.array(( thrust/mass - g -0.5*rho*cross_section*cw*v**2*np.sign(v)/mass,   v))
 
 def diff_sep(x, t, t_s):
-  """differential equation without separation"""
+  """differential equation with separation"""
   thrust = f_thrust(t)
   mass = f_m_sep(t,t_s)  # f_m_sep
   v = x[0]
