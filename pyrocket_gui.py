@@ -6,9 +6,8 @@ from scipy import interpolate
 import Tkinter as tk
 
 # tested with python 2.7.6 , matplotlib 1.3.1, numpy 1.8.0, scipy 0.13.0
+# Michael Russwurm 2014
 print("### pyrocket ###")
-
-
 
 class pyrocket_gui:
     def __init__(self):
@@ -19,7 +18,7 @@ class pyrocket_gui:
         def simulation():
             if self.two_stage_sim.get() == 1:
                 return()
-            else:
+            else:                
                 pyrocket_one_stage()
             return()
         
@@ -73,7 +72,7 @@ class pyrocket_gui:
         self.sim_steps_label.grid(row=5, column=0, padx=10, pady=2)
         self.sim_steps_var = tk.Entry(self.leftFrame)
         self.sim_steps_var.grid(row=5, column=2)
-        self.sim_steps_var.insert(1,1000)
+        self.sim_steps_var.insert(1,10000)
         self.sim_steps_unit_label = tk.Label(self.leftFrame, text="[1]")
         self.sim_steps_unit_label.grid(row=5, column=3, padx=10, pady=2)
         
@@ -86,6 +85,39 @@ class pyrocket_gui:
         self.button= tk.Checkbutton(self.leftFrame, text="Two Stage Rocket", variable=self.two_stage_sim)
         self.button.grid(row=7, column=0, padx=10, pady=2)
         
+        self.mass_upper_label = tk.Label(self.leftFrame, text="Mass Upper Stage (excl. Propelant Mass)")
+        self.mass_upper_label.grid(row=8, column=0, padx=10, pady=2)
+        self.mass_upper_var = tk.Entry(self.leftFrame)
+        self.mass_upper_var.grid(row=8, column=2)
+        self.mass_upper_var.insert(1,5)
+        self.mass_upper_unit_label = tk.Label(self.leftFrame, text="[kg]")
+        self.mass_upper_unit_label.grid(row=8, column=3, padx=10, pady=2)
+        
+        self.cw_upper_label = tk.Label(self.leftFrame, text="Cw (upper stage)")
+        self.cw_upper_label.grid(row=9, column=0, padx=10, pady=2)
+        self.cw_upper_var = tk.Entry(self.leftFrame)
+        self.cw_upper_var.grid(row=9, column=2)
+        self.cw_upper_var.insert(1,0.55)
+        self.cw_upper_unit_label = tk.Label(self.leftFrame, text="[1]")
+        self.cw_upper_unit_label.grid(row=9, column=3, padx=10, pady=2)
+        
+        self.motor_upper_k570 = tk.IntVar()
+        self.motor_upper_k570_button= tk.Checkbutton(self.leftFrame, text="K570 Motor", variable=self.motor_upper_k570)
+        self.motor_upper_k570_button.grid(row=10, column=0, padx=10, pady=2)
+        self.motor_upper_k570_button.select()
+        
+        self.autotracking_select_var = tk.IntVar()
+        self.autotracking_button= tk.Checkbutton(self.leftFrame, text="Autotracking Simulation", variable=self.autotracking_select_var)
+        self.autotracking_button.grid(row=11, column=0, padx=10, pady=2)
+        
+        self.autotracking_label = tk.Label(self.leftFrame, text="Autotracking Distance")
+        self.autotracking_label.grid(row=12, column=0, padx=10, pady=2)
+        self.autotracking_var = tk.Entry(self.leftFrame)
+        self.autotracking_var.grid(row=12, column=2)
+        self.autotracking_var.insert(1,1000)
+        self.autotracking_label = tk.Label(self.leftFrame, text="[m]")
+        self.autotracking_label.grid(row=12, column=3, padx=10, pady=2)
+        
         self.commandFrame = tk.Frame(self.main_window, width=200, height = 200)
         self.commandFrame.grid(row=1, column=0, padx=10, pady=2)
         
@@ -95,7 +127,6 @@ class pyrocket_gui:
         self.quit_program = tk.Button(self.commandFrame, text=' Quit ', command=self.main_window.quit)
         self.quit_program.grid(row=1, column=0, padx=10, pady=2)
         
-        # Motor Data
         class k570:
             def __init__(self):
                 self.m_propelant = 0.990
@@ -147,9 +178,10 @@ class pyrocket_gui:
         
         
         def pyrocket_one_stage():
-            print("# One Stage Simulation #")
+            print("# One stage simulation #")
             # Parameters
-            motor = k570()
+            if self.motor_k570.get() == 1:
+                motor = k570()
             cross_section =  (float(self.diameter_var.get())/1000)**2*np.pi/4.
             t_flight= float(self.flight_time_var.get())
             m_empty= float(self.mass_start_var.get())
@@ -157,6 +189,7 @@ class pyrocket_gui:
             cw = float(self.cw_total_var.get())
             m_start= m_empty + motor.m_propelant
             f_m = interpolate.interp1d([-100.,0.,motor.t_burn,inf],[(m_start),(m_start),m_start-motor.m_propelant,m_start-motor.m_propelant],kind='slinear',bounds_error=True)
+            
             
             def diff(x, t):
                 """differential equation without separation"""
@@ -198,18 +231,51 @@ class pyrocket_gui:
             #print("Velocity after 7 m:     %4.3f m/s" % f_v_h(7.))
             print ("Apogee after:          %4.3f s" % t[i_apogee])
             print ("Impact after:          %4.3f s" % t[i_impact])
-            print (" ")
+            print (" ")   
 
-
+            fig, ax = plt.subplots(3,1,sharex=True)
+            ax[0].plot(t,a,label="Acceleration")
+            ax[0].fill_between(t, 0, a,alpha=0.1)
+            ax[0].grid()
+            ax[0].legend()
+            ax[0].set_ylabel("Acceleration m/s^2")
+            ax[0].set_xlabel("Time s")
+            ax[0].set_title("Rocket Acceleration max. %0.2f m/s^2" % a_max)
+            ax[1].plot(t,v,label="Velocity")
+            ax[1].fill_between(t, 0, v,alpha=0.1)
+            ax[1].grid()
+            ax[1].legend()
+            ax[1].set_ylabel("Velocity m/s")
+            ax[1].set_xlabel("Time s")
+            ax[1].set_title("Rocket Velocity max. %0.2f m/s" % v_max)
+            ax[2].plot(t,h,label="Altitude")
+            ax[2].set_ylim([0,np.around(h_max*0.001251)*1000])
+            ax[2].fill_between(t, 0, h,alpha=0.1)
+            ax[2].grid()
+            ax[2].legend()
+            ax[2].set_ylabel("Altitude m")
+            ax[2].set_xlabel("Time s")
+            ax[2].set_title("Rocket Altitude max. %0.2f m" % h_max)
+            fig.tight_layout()
+            #with open('flight.png', 'w') as outfile:
+            #    fig.canvas.print_png(outfile) 
             
+            if self.autotracking_select_var.get() ==1:                
+                d_ramp  = float(self.autotracking_var.get()) # distance to ramp
+                phi_1 = np.degrees(np.arctan(h/d_ramp))
+                fig, ax = plt.subplots(1,1)
+                ax.plot(t,phi_1,label="Distance: %3.d m" % d_ramp)
+                ax.grid()
+                ax.legend()
+                ax.set_ylim([0,90])
+                ax.set_ylabel("Angle deg")
+                ax.set_xlabel("Time s")
+                ax.set_title("Autotracking")
+                 
+            plt.show()
         
         # Enter the tkinter main loop.
         tk.mainloop()
-    
-        
-
-
-
 
 # Create an instance of the GUI class.
 pyrocket = pyrocket_gui()
