@@ -10,14 +10,14 @@ Small Amateur 1D Rocket Simulation Script
   * Changing Density over Altitude
 * Thrust Curve through Interpolation
   * Custom Thrust Curves can be Implemented
-* Time Dependent Drag
+* Time Dependent Drag (not in GUI)
   * Usable for: Parachutes, Separation, ...
-* Time Dependent Mass
+* Time Dependent Mass (not in GUI)
 * Max. Altitude Calculation
 * Altitude, Velocity, Acceleration Calculation
-* Ideal Separation Time Optimization
+* Ideal Separation Time Optimization (not in GUI)
 * Automatic Plots
-* Following Camera Angle over Time
+* Following Camera Angle over Time (not in GUI)
   * Dependent on distance to launchpad
 
 ##Output
@@ -49,7 +49,8 @@ Small Amateur 1D Rocket Simulation Script
   * Touch Down region
     * Ballistic Flight
     * Successfull Parachute Flight
-* UI (Pygame)
+* 2 stage in GUI
+* Parachute in GUI
 
 ## Contact
 Twitter: @soegal
