@@ -3,6 +3,8 @@ pyrocket
 
 Small Amateur 1D Rocket Simulation Program
 
+To run a simulation just execute `python pyrocket_gui.py` and change the parameters.
+
 ## What is Implemented
 
 * Standard Atmosphere
