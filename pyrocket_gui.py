@@ -79,9 +79,9 @@ class pyrocket_gui:
                 cw_para = float(self.cw_parachute_var.get())
                 t_deploy = float(self.t_deploy_parachute_var.get())
                 para_cross_section = float(self.parachute_area_var.get())
+                print(cw_para, cw_rocket, para_cross_section)
                 cw_t= interpolate.interp1d([-100.,inf],[(cw_rocket),(cw_rocket)],kind='linear',bounds_error=True)
-                # deployment duration 0.5 s
-                cw_para_t= interpolate.interp1d([-100., t_deploy-0.1, t_deploy+0.4 ,inf],[(0.0),0.0,cw_para,cw_para],kind='linear',bounds_error=True)
+                cw_para_t= interpolate.interp1d([-100., t_deploy, t_deploy+0.01,inf],[(0.0),0.0,cw_para,cw_para],kind='linear',bounds_error=True)
             else:
                 para_cross_section = 0.
                 cw_rocket = float(self.cw_total_var.get())
@@ -122,21 +122,31 @@ class pyrocket_gui:
             a = motor.f_thrust(t)/f_m(t) - self.g -0.5*rho_h(h)*cross_section*cw_t(t)*v**2*np.sign(v)/f_m(t)
             # max. values
             a_max = np.nanmax(a)
+            a_min = np.nanmin(a)
             v_max = np.nanmax(v)
+            v_min = np.nanmin(v)
             h_max = np.nanmax(h)
             i_apogee = find_nearest(h,h_max)
             # impact element and apogee element
             i_impact = find_nearest(h[30:],0.0)
             i_apogee = find_nearest(h,h_max)
+            a_t = interpolate.interp1d(t,a,kind='linear',bounds_error=True)
+            v_t = interpolate.interp1d(t,v,kind='linear',bounds_error=True)
             # print values
             print("Results:")
-            print("Max. Acceleration:      %4.3f m/s^2" % a_max)
-            print("Max. Velocity:          %4.3f m/s" % v_max)
+            print("Max. pos. Acceleration: %4.3f m/s^2" % a_max)
+            print("Max. pos. Velocity:     %4.3f m/s" % v_max)
+            print("Max. neg. Acceleration: %4.3f m/s^2" % a_min)
+            print("Max. neg. Velocity:     %4.3f m/s" % v_min)
+            if self.parachute_sim.get() ==1: 
+                print("Max. Parachute Force:   %4.3f N" % (m_empty/a_t(t_deploy+0.1)))
+                print("Parachute Depl. Vel.:   %4.3f m/s" % (v_t(t_deploy+0.1)))
             print("Max. Altitude:          %4.3f m" % h_max)
             #print("Velocity after 4 m:     %4.3f m/s" % f_v_h(4.))
             #print("Velocity after 7 m:     %4.3f m/s" % f_v_h(7.))
             print ("Apogee after:          %4.3f s" % t[i_apogee])
             print ("Impact after:          %4.3f s" % t[i_impact])
+            
               
 
             fig, ax = plt.subplots(3,1,sharex=True)
@@ -155,7 +165,7 @@ class pyrocket_gui:
             ax[1].set_xlabel("Time s")
             ax[1].set_title("Rocket Velocity max. %0.2f m/s" % v_max)
             ax[2].plot(t,h,label="Altitude")
-            ax[2].set_ylim([0,np.around(h_max*0.001251)*1000])
+            #ax[2].set_ylim([0,np.around(h_max*0.001251)*1000])
             ax[2].fill_between(t, 0, h,alpha=0.1)
             ax[2].grid()
             ax[2].legend()
@@ -202,7 +212,7 @@ class pyrocket_gui:
         self.flight_time_label.grid(row=1, column=0, padx=10, pady=2)
         self.flight_time_var = tk.Entry(self.leftFrame)
         self.flight_time_var.grid(row=1, column=2)
-        self.flight_time_var.insert(1,100)
+        self.flight_time_var.insert(1,200)
         self.flight_time_unit_label = tk.Label(self.leftFrame, text="[s]")
         self.flight_time_unit_label.grid(row=1, column=3, padx=10, pady=2)
         
