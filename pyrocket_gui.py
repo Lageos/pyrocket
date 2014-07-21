@@ -5,9 +5,11 @@ from scipy.integrate import odeint
 from scipy import interpolate
 import Tkinter as tk
 
-# tested with python 2.7.6 , matplotlib 1.3.1, numpy 1.8.0, scipy 0.13.0
+
 # Michael Russwurm 2014
+
 print("### pyrocket ###")
+# Nmkgs units (mostly)
 
 class pyrocket_gui:
     def __init__(self):
@@ -90,7 +92,7 @@ class pyrocket_gui:
             m_start= m_empty + motor.m_propelant
             f_m = interpolate.interp1d([-100.,0.,motor.t_burn,inf],[(m_start),(m_start),m_start-motor.m_propelant,m_start-motor.m_propelant],kind='slinear',bounds_error=True)
             print("Simulation time:        %0.1f s" % t_flight)
-            print("Steps:                  %0.2d" % n)
+            print("Evaluations:            %0.2d" % n)
             print("Start mass:             %0.2f kg" % m_start)
             print("Diameter:               %0.3f m" % (float(self.diameter_var.get())/1000))
             print("Cw:                     %0.5f" % cw_rocket)
@@ -145,9 +147,7 @@ class pyrocket_gui:
             #print("Velocity after 4 m:     %4.3f m/s" % f_v_h(4.))
             #print("Velocity after 7 m:     %4.3f m/s" % f_v_h(7.))
             print ("Apogee after:          %4.3f s" % t[i_apogee])
-            print ("Impact after:          %4.3f s" % t[i_impact])
-            
-              
+            print ("Impact after:          %4.3f s" % t[i_impact])             
 
             fig, ax = plt.subplots(3,1,sharex=True)
             ax[0].plot(t,a,label="Acceleration")
@@ -206,7 +206,6 @@ class pyrocket_gui:
         # Create a Label widget containing the
         self.Parameter_Label = tk.Label(self.leftFrame, text='PyRocket', font="Helvetica 12 italic")
         self.Parameter_Label.grid(row=0, column=0, padx=10, pady=2)
-
         
         self.flight_time_label = tk.Label(self.leftFrame, text="Flight Time")
         self.flight_time_label.grid(row=1, column=0, padx=10, pady=2)
