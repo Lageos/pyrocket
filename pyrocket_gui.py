@@ -78,10 +78,10 @@ class pyrocket_gui:
                 cw_rocket = float(self.cw_total_var.get())
                 cw_para = float(self.cw_parachute_var.get())
                 t_deploy = float(self.t_deploy_parachute_var.get())
+                t_dur_para = float(self.t_dur_parachute_var.get())
                 para_cross_section = float(self.parachute_area_var.get())
-                print(cw_para, cw_rocket, para_cross_section)
                 cw_t= interpolate.interp1d([-100.,inf],[(cw_rocket),(cw_rocket)],kind='linear',bounds_error=True)
-                cw_para_t= interpolate.interp1d([-100., t_deploy, t_deploy+0.01,inf],[(0.0),0.0,cw_para,cw_para],kind='linear',bounds_error=True)
+                cw_para_t= interpolate.interp1d([-100., t_deploy, t_deploy+t_dur_para,inf],[(0.0),0.0,cw_para,cw_para],kind='linear',bounds_error=True)
             else:
                 para_cross_section = 0.
                 cw_rocket = float(self.cw_total_var.get())
@@ -94,7 +94,6 @@ class pyrocket_gui:
             print("Start mass:             %0.2f kg" % m_start)
             print("Diameter:               %0.3f m" % (float(self.diameter_var.get())/1000))
             print("Cw:                     %0.5f" % cw_rocket)
-            
             def diff(x, t):
                 """differential equation without separation"""
                 thrust = motor.f_thrust(t)
@@ -104,22 +103,22 @@ class pyrocket_gui:
                 v = x[0]
                 h = x[1]
                 rho = rho_h(h)
-                
                 # array  x[1]= x,  x[0] =x'
-                return np.array(( thrust/mass - self.g -0.5*rho*(cross_section*cw+cw_para*para_cross_section)*v**2*np.sign(v)/mass, v))
-            
+                return np.array(( thrust/mass - self.g 
+                -0.5*rho*(cross_section*cw+cw_para*para_cross_section)*np.power(v,2)*np.sign(v)/mass, v))
             ## Solution
             x_0 = np.array([0., 0.])
             t = np.linspace(0., t_flight, n)
             ## solve ode without separation
-            x = odeint(diff, x_0, t)
+            x, infodict  = odeint(diff, x_0, t,full_output=True,printmessg=True)
             print("# Simulation Finished #")
+            #print(infodict)
             # velocity
             v = x[:,0]
             # altitude
             h = x[:,1]
             # acceleration
-            a = motor.f_thrust(t)/f_m(t) - self.g -0.5*rho_h(h)*cross_section*cw_t(t)*v**2*np.sign(v)/f_m(t)
+            a = motor.f_thrust(t)/f_m(t)-0.5*rho_h(h)*(cross_section*cw_t(t)+cw_para_t(t)*para_cross_section)*np.power(v,2)*np.sign(v)/f_m(t)
             # max. values
             a_max = np.nanmax(a)
             a_min = np.nanmin(a)
@@ -130,8 +129,8 @@ class pyrocket_gui:
             # impact element and apogee element
             i_impact = find_nearest(h[30:],0.0)
             i_apogee = find_nearest(h,h_max)
-            a_t = interpolate.interp1d(t,a,kind='linear',bounds_error=True)
-            v_t = interpolate.interp1d(t,v,kind='linear',bounds_error=True)
+            a_t = interpolate.interp1d(t,a,kind='slinear',bounds_error=True)
+            v_t = interpolate.interp1d(t,v,kind='slinear',bounds_error=True)
             # print values
             print("Results:")
             print("Max. pos. Acceleration: %4.3f m/s^2" % a_max)
@@ -139,8 +138,9 @@ class pyrocket_gui:
             print("Max. neg. Acceleration: %4.3f m/s^2" % a_min)
             print("Max. neg. Velocity:     %4.3f m/s" % v_min)
             if self.parachute_sim.get() ==1: 
-                print("Max. Parachute Force:   %4.3f N" % (m_empty/a_t(t_deploy+0.1)))
-                print("Parachute Depl. Vel.:   %4.3f m/s" % (v_t(t_deploy+0.1)))
+                a_para_deploy = np.nanmax(np.abs(a_t(np.linspace(t_deploy-0.1,t_deploy+t_dur_para+0.1,50))))
+                print("Max. Parachute Force:   %4.3f N" % (m_empty*a_para_deploy))
+                print("Parachute Depl. Vel.:   %4.3f m/s" % (v_t(t_deploy)))
             print("Max. Altitude:          %4.3f m" % h_max)
             #print("Velocity after 4 m:     %4.3f m/s" % f_v_h(4.))
             #print("Velocity after 7 m:     %4.3f m/s" % f_v_h(7.))
@@ -240,11 +240,11 @@ class pyrocket_gui:
         self.cw_total_unit_label = tk.Label(self.leftFrame, text="[1]")
         self.cw_total_unit_label.grid(row=4, column=3, padx=10, pady=2)
         
-        self.sim_steps_label = tk.Label(self.leftFrame, text="Simulation Steps")
+        self.sim_steps_label = tk.Label(self.leftFrame, text="Simulation Evalualtion Number")
         self.sim_steps_label.grid(row=5, column=0, padx=10, pady=2)
         self.sim_steps_var = tk.Entry(self.leftFrame)
         self.sim_steps_var.grid(row=5, column=2)
-        self.sim_steps_var.insert(1,10000)
+        self.sim_steps_var.insert(1,300)
         self.sim_steps_unit_label = tk.Label(self.leftFrame, text="[1]")
         self.sim_steps_unit_label.grid(row=5, column=3, padx=10, pady=2)
         
@@ -280,44 +280,51 @@ class pyrocket_gui:
         self.t_deploy_parachute_var.insert(1,20)
         self.t_deploy_parachute_unit_label = tk.Label(self.leftFrame, text="[s]")
         self.t_deploy_parachute_unit_label.grid(row=10, column=3, padx=10, pady=2)
-                
+        
+        self.t_dur_parachute_label = tk.Label(self.leftFrame, text="Parachute Deployment Duration")
+        self.t_dur_parachute_label.grid(row=11, column=0, padx=10, pady=2)
+        self.t_dur_parachute_var = tk.Entry(self.leftFrame)
+        self.t_dur_parachute_var.grid(row=11, column=2)
+        self.t_dur_parachute_var.insert(1,0.2)
+        self.t_dur_parachute_unit_label = tk.Label(self.leftFrame, text="[s]")
+        self.t_dur_parachute_unit_label.grid(row=11, column=3, padx=10, pady=2)                
         
         self.two_stage_sim = tk.IntVar()
         self.button= tk.Checkbutton(self.leftFrame, text="Two Stage Rocket", variable=self.two_stage_sim)
-        self.button.grid(row=11, column=0, padx=10, pady=2)
+        self.button.grid(row=12, column=0, padx=10, pady=2)
         
         self.mass_upper_label = tk.Label(self.leftFrame, text="Mass Upper Stage (excl. Propelant Mass)")
-        self.mass_upper_label.grid(row=12, column=0, padx=10, pady=2)
+        self.mass_upper_label.grid(row=13, column=0, padx=10, pady=2)
         self.mass_upper_var = tk.Entry(self.leftFrame)
-        self.mass_upper_var.grid(row=12, column=2)
+        self.mass_upper_var.grid(row=13, column=2)
         self.mass_upper_var.insert(1,5)
         self.mass_upper_unit_label = tk.Label(self.leftFrame, text="[kg]")
-        self.mass_upper_unit_label.grid(row=12, column=3, padx=10, pady=2)
+        self.mass_upper_unit_label.grid(row=13, column=3, padx=10, pady=2)
         
         self.cw_upper_label = tk.Label(self.leftFrame, text="Cw (upper stage)")
-        self.cw_upper_label.grid(row=13, column=0, padx=10, pady=2)
+        self.cw_upper_label.grid(row=14, column=0, padx=10, pady=2)
         self.cw_upper_var = tk.Entry(self.leftFrame)
-        self.cw_upper_var.grid(row=13, column=2)
+        self.cw_upper_var.grid(row=14, column=2)
         self.cw_upper_var.insert(1,0.55)
         self.cw_upper_unit_label = tk.Label(self.leftFrame, text="[1]")
-        self.cw_upper_unit_label.grid(row=13, column=3, padx=10, pady=2)
+        self.cw_upper_unit_label.grid(row=14, column=3, padx=10, pady=2)
         
         self.motor_upper_k570 = tk.IntVar()
         self.motor_upper_k570_button= tk.Checkbutton(self.leftFrame, text="K570 Motor", variable=self.motor_upper_k570)
-        self.motor_upper_k570_button.grid(row=14, column=0, padx=10, pady=2)
+        self.motor_upper_k570_button.grid(row=15, column=0, padx=10, pady=2)
         self.motor_upper_k570_button.select()
         
         self.autotracking_select_var = tk.IntVar()
         self.autotracking_button= tk.Checkbutton(self.leftFrame, text="Autotracking Simulation", variable=self.autotracking_select_var)
-        self.autotracking_button.grid(row=15, column=0, padx=10, pady=2)
+        self.autotracking_button.grid(row=16, column=0, padx=10, pady=2)
         
         self.autotracking_label = tk.Label(self.leftFrame, text="Autotracking Distance")
-        self.autotracking_label.grid(row=16, column=0, padx=10, pady=2)
+        self.autotracking_label.grid(row=17, column=0, padx=10, pady=2)
         self.autotracking_var = tk.Entry(self.leftFrame)
-        self.autotracking_var.grid(row=16, column=2)
+        self.autotracking_var.grid(row=17, column=2)
         self.autotracking_var.insert(1,1000)
         self.autotracking_label = tk.Label(self.leftFrame, text="[m]")
-        self.autotracking_label.grid(row=16, column=3, padx=10, pady=2)
+        self.autotracking_label.grid(row=17, column=3, padx=10, pady=2)
         
         self.commandFrame = tk.Frame(self.main_window, width=200, height = 200)
         self.commandFrame.grid(row=1, column=0, padx=10, pady=2)
