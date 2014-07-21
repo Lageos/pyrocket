@@ -11,8 +11,8 @@ To run a simulation just execute `python pyrocket_gui.py` and change the paramet
   * Changing Temperature over Altitude
   * Changing Density over Altitude
 * Thrust Curve through Interpolation
-  * Custom Thrust Curves can be Implemented
-* Time Dependent Drag (not in GUI)
+  * Custom Thrust Curves can be Implemented (through motor classes)
+* Time Dependent Drag (only main chute in GUI)
   * Usable for: Parachutes, Separation, ...
 * Time Dependent Mass (not in GUI)
 * Max. Altitude Calculation
@@ -21,24 +21,11 @@ To run a simulation just execute `python pyrocket_gui.py` and change the paramet
 * Automatic Plots
 * Following Camera Angle over Time
   * Dependent on distance to launchpad
+* Main-Parachute in GUI
 
 ##Output
 
-### Flight
-
-![flight](https://raw.githubusercontent.com/Lageos/pyrocket/master/flight.png)
-
-### Rocket Properties over Time
-
-![properties](https://raw.githubusercontent.com/Lageos/pyrocket/master/rocket_properties.png)
-
-### Optimal Separation Time Optimization
-
-![optim_t_sep](https://raw.githubusercontent.com/Lageos/pyrocket/master/t_sep_altitude.png)
-
-### Autotracking Angle
-
-![autotracking_angle](https://raw.githubusercontent.com/Lageos/pyrocket/master/autotracking.png)
+See images in repository
 
 ## Future Plans
 
@@ -52,7 +39,7 @@ To run a simulation just execute `python pyrocket_gui.py` and change the paramet
     * Ballistic Flight
     * Successfull Parachute Flight
 * 2 stage in GUI
-* Parachute in GUI
+* Drogue
 
 ## Contact
 Twitter: @soegal
